@@ -2,9 +2,9 @@
 #include <vector>
 #include <cstring>
 
-#include "../include/common.h"
+#include "../include/common.hpp"
 #include "../include/lodepng.h"
-#include "../include/canvas.h"
+#include "../include/canvas.hpp"
 
 namespace life {
     void Canvas::pixel (const Point2& point, const Color& color) {        
