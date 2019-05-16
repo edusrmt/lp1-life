@@ -5,17 +5,23 @@
 #include "../include/lodepng.h"
 
 using namespace life;
+using namespace std;
 
 void GameManager::initialize_game(int argc, char *argv[])
 {
+    cout << ">>> Trying to open input file [" << argv[1] << "]... ";
     std::ifstream input;
     input.open(argv[1]);
-
+    cout << "done!" << endl;
+    
+    cout << ">>> Processing data, please wait..." << endl;
     char alive;
     std::string line;
 
     input >> rows >> cols;
+    cout << ">>> Grid size read from input file: " << rows << " rows by " << cols << " cols." << endl;
     input >> alive;
+    cout << ">>> Character that represents a living cell read from input file: ’" << alive << "’" << endl;
     state = Life(rows,cols);
 
     int row = 0;
@@ -36,6 +42,16 @@ void GameManager::initialize_game(int argc, char *argv[])
     } else if (argc <= 2) {
         input.open(argv[1]);
     }*/
+
+    
+    cout << ">>> Finished reading input data file." << endl << endl;
+    cout << "****************************************************************" << endl;
+    cout << "Welcome to Conway’s game of Life." << endl;
+    cout << "Running a simulation on a grid of size " << rows << " by " << cols << " in which" << endl;
+    cout << "each cell can either be occupied by an organism or not." << endl;
+    cout << "The occupied cells change from generation to generation" << endl;
+    cout << "according to the number of neighboring cells which are alive." << endl;
+    cout << "****************************************************************" << endl << endl;
 
     input.close();
 }
@@ -81,19 +97,25 @@ bool GameManager::save_ppm3( const unsigned char * data, size_t w, size_t h, siz
     return result;
 }
 
+void GameManager::evolve () {
+    
+}
+
 void GameManager::render () {
+    cout << "Generation " << gen << ":" << endl;
+
     for (int i = 0; i < rows; i++) {
+        cout << "[";
         for (int j = 0; j < cols; j++) {
             if (state.grid[i][j] == true)
-                std::cout << '*';
+                cout << '*';
             else if (state.grid[i][j] == false)
             {
-                std::cout << '.';
-            }
-            
+                cout << ' ';
+            }            
         }
 
-        std::cout << std::endl;
+        std::cout << "]" << std::endl;
     }
 
     Canvas image(cols, rows, 10);

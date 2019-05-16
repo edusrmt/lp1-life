@@ -12,7 +12,7 @@ namespace life {
     {
         private:
         life::Life state;
-        int rows, cols;
+        int rows, cols, gen = 1;
 
         public:
         GameManager() {};
@@ -22,6 +22,7 @@ namespace life {
 
         void initialize_game(int argc, char *argv[]);
         bool game_over();
+        void evolve ();
         void render ();
     };
 }

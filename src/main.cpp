@@ -7,8 +7,8 @@ int main(int argc, char *argv[]) {
     game.initialize_game(argc, argv);
 
     while (not game.game_over()) {
+        game.evolve();
         game.render();
-        break;
     }
 
     return 0;
