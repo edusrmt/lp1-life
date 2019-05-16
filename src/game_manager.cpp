@@ -1,6 +1,8 @@
 #include "../include/game_manager.hpp"
-#include "../include/visor.hpp"
+//#include "../include/visor.hpp"
 #include "../include/life.hpp"
+#include "../include/canvas.hpp"
+#include "../include/lodepng.h"
 
 using namespace life;
 
@@ -9,24 +11,24 @@ void GameManager::initialize_game(int argc, char *argv[])
     std::ifstream input;
     input.open(argv[1]);
 
-    int r, c;
     char alive;
     std::string line;
 
-    input >> r >> c;
+    input >> rows >> cols;
     input >> alive;
+    state = Life(rows,cols);
 
+    int row = 0;
     while (input >> line) {
-        if (line.size() < (size_t)c) {
-            // Leia os que tiver e inteire com morto
-        }
-        else if (line.size() >= (size_t)c) {
-            // Leia c caracteres
-        }
-    }
+        int rpt = line.size() < (size_t) cols ? line.size() : cols;
 
+        for(int col = 0; col < rpt; col++) {
+            if (line[col] == alive)                
+                state.set_alive(row, col);
+        }
 
-    state = Life(r,c);
+        row++;
+    }    
 
     /*if (argc <= 2 && !strcmp(argv[1], "-h"))
     {
@@ -34,12 +36,77 @@ void GameManager::initialize_game(int argc, char *argv[])
     } else if (argc <= 2) {
         input.open(argv[1]);
     }*/
-    
-    
 
     input.close();
 }
 
 bool GameManager::game_over () {
-    return state.stable() || state.extinct();
+    return state.extinct();
+}
+
+void GameManager::encode_png(const char* filename, const unsigned char * image, unsigned width, unsigned height)
+{
+    //Encode the image
+    unsigned error = lodepng::encode(filename, image, width, height);
+
+    //if there's an error, display it
+    if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
+}
+
+bool GameManager::save_ppm3( const unsigned char * data, size_t w, size_t h, size_t d,  const std::string & file_name_ )
+{
+    std::ofstream ofs_file( file_name_, std::ios::out  );
+    if ( not ofs_file.is_open() )
+        return false;
+
+    ofs_file << "P3\n"
+        << w << " " << h << "\n"
+        << "255\n";
+
+    size_t i{0};
+    while ( i < (w*h*d) )
+    {
+        // depth traversal, usually 3.
+        for( auto id{0u} ; id < 3 ; id++ )
+            ofs_file << (int) *(data + i++ ) << " ";
+        ofs_file << std::endl;
+        i++; // to skip alpha channel.
+    }
+
+    // Did it not fail?
+    auto result = not ofs_file.fail();
+
+    ofs_file.close();
+
+    return result;
+}
+
+void GameManager::render () {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (state.grid[i][j] == true)
+                std::cout << '*';
+            else if (state.grid[i][j] == false)
+            {
+                std::cout << '.';
+            }
+            
+        }
+
+        std::cout << std::endl;
+    }
+
+    Canvas image(cols, rows, 10);
+    
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (state.grid[i][j])
+                image.pixel(Point2{j, i}, Color{255,255,255});
+            else
+                image.pixel(Point2{j, i}, Color{0,0,0});
+        }
+    }
+
+    encode_png("test.png", image.pixels(), image.width(), image.height() );
+    save_ppm3( image.pixels(), image.width(), image.height(), 4, "test.ppm");
 }

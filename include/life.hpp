@@ -10,28 +10,33 @@ namespace life {
     */    
     class Life {
         private:
-        bool **grid;
+        
         int g_rows, g_cols;
 
         public:
-        Life (int rows, int cols) : g_rows{rows}, g_cols{cols} {
-            grid = new bool*[rows];
+        std::vector<std::vector<bool>> grid;
 
-            for(int i = 0; i < rows; i++)
-                grid[i] = new bool[cols];
+        Life (int rows, int cols) : g_rows{rows}, g_cols{cols} {
+            grid.resize(rows);
+
+            for(std::vector<bool> c : grid)
+                c.resize(cols);
+
+            for (int i = 0; i < g_rows; i++) {
+                for (int j = 0; j < g_cols; j++) {
+                    grid[i].push_back(false);
+                }
+            }
         }
 
         Life () {}
 
         ~Life() { 
-            /*for(int i = 0; i < g_rows; i++)
-                if (grid[i] != nullptr) delete [] grid[i];
-
-            if (grid != nullptr) delete [] grid;*/
+            
         }
 
-        bool stable () {
-            return false;
+        void set_alive (int row, int col) {
+            grid[row][col] = true;
         }
 
         bool extinct () {

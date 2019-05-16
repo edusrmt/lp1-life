@@ -19,4 +19,5 @@ include_directories( include )
 #=== Main App ===
 file(GLOB SOURCES "src/*.cpp")
 
+set(EXECUTABLE_OUTPUT_PATH "bin")
 add_executable(glife ${SOURCES})
