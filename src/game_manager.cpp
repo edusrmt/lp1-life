@@ -22,7 +22,7 @@ void GameManager::initialize_game(int argc, char *argv[])
     cout << ">>> Grid size read from input file: " << rows << " rows by " << cols << " cols." << endl;
     input >> alive;
     cout << ">>> Character that represents a living cell read from input file: ’" << alive << "’" << endl;
-    state = Life(rows,cols);
+    Life state(rows,cols);
 
     int row = 0;
     while (input >> line) {
@@ -53,11 +53,23 @@ void GameManager::initialize_game(int argc, char *argv[])
     cout << "according to the number of neighboring cells which are alive." << endl;
     cout << "****************************************************************" << endl << endl;
 
+    log.push_back(state);
     input.close();
 }
 
+bool GameManager::stable () {
+    int last = log.size() - 1;
+
+    for (int i = 0; i < last; i++) {
+        if (log[i] == log[last])
+            return true;
+    }    
+
+    return false;
+}
+
 bool GameManager::game_over () {
-    return state.extinct();
+    return stable() || log.back().extinct();
 }
 
 void GameManager::encode_png(const char* filename, const unsigned char * image, unsigned width, unsigned height)
@@ -69,36 +81,36 @@ void GameManager::encode_png(const char* filename, const unsigned char * image, 
     if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
 }
 
-bool GameManager::save_ppm3( const unsigned char * data, size_t w, size_t h, size_t d,  const std::string & file_name_ )
-{
-    std::ofstream ofs_file( file_name_, std::ios::out  );
-    if ( not ofs_file.is_open() )
-        return false;
+void GameManager::evolve () {
+    int neigh;
+    Life state = log.back();
+    Life next(rows, cols);
 
-    ofs_file << "P3\n"
-        << w << " " << h << "\n"
-        << "255\n";
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            neigh = 0;
+            // Counts neighbours
+            for (int k = -1; k <= 1; k++) {
+                for (int l = -1; l <= 1; l++) {
+                    if (k == 0 && l == 0)
+                        continue;
 
-    size_t i{0};
-    while ( i < (w*h*d) )
-    {
-        // depth traversal, usually 3.
-        for( auto id{0u} ; id < 3 ; id++ )
-            ofs_file << (int) *(data + i++ ) << " ";
-        ofs_file << std::endl;
-        i++; // to skip alpha channel.
+                    neigh += state.check_cell(i + k, j + l);
+                }
+            }
+
+            // Apply rules
+            if (state.check_cell(i, j)) {
+                if(neigh == 2 || neigh == 3)
+                    next.set_alive(i, j);
+            } else if (neigh == 3) {
+                next.set_alive(i, j);
+            }
+        }
     }
 
-    // Did it not fail?
-    auto result = not ofs_file.fail();
-
-    ofs_file.close();
-
-    return result;
-}
-
-void GameManager::evolve () {
-    
+    log.push_back(next);
+    gen++;        
 }
 
 void GameManager::render () {
@@ -107,28 +119,30 @@ void GameManager::render () {
     for (int i = 0; i < rows; i++) {
         cout << "[";
         for (int j = 0; j < cols; j++) {
-            if (state.grid[i][j] == true)
+            if (log.back().check_cell(i, j))
                 cout << '*';
-            else if (state.grid[i][j] == false)
+            else
             {
                 cout << ' ';
             }            
         }
 
-        std::cout << "]" << std::endl;
+        cout << "]" << endl;
     }
 
     Canvas image(cols, rows, 10);
     
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            if (state.grid[i][j])
-                image.pixel(Point2{j, i}, Color{255,255,255});
+            if (log.back().check_cell(i, j))
+                image.pixel(Point2{j, i}, Color{0,0,255});
             else
-                image.pixel(Point2{j, i}, Color{0,0,0});
+                image.pixel(Point2{j, i}, Color{255,255,255});
         }
     }
 
-    encode_png("test.png", image.pixels(), image.width(), image.height() );
-    save_ppm3( image.pixels(), image.width(), image.height(), 4, "test.ppm");
+    string picpath= "./pics/gen-" + to_string(gen) + ".png";
+    char picname[picpath.length() + 1];
+    strcpy(picname, picpath.c_str());
+    encode_png(picname, image.pixels(), image.width(), image.height());
 }

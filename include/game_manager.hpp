@@ -11,7 +11,7 @@ namespace life {
     class GameManager
     {
         private:
-        life::Life state;
+        std::vector<life::Life> log;
         int rows, cols, gen = 1;
 
         public:
@@ -20,6 +20,7 @@ namespace life {
         void encode_png(const char* filename, const unsigned char * image, unsigned width, unsigned height);
         bool save_ppm3( const unsigned char * data, size_t w, size_t h, size_t d,  const std::string & file_name_ );
 
+        bool stable ();
         void initialize_game(int argc, char *argv[]);
         bool game_over();
         void evolve ();
