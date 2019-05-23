@@ -3,6 +3,7 @@
 
 #include <cstring> // memset, memcpy
 #include <iostream>
+#include <string.h>
 
 namespace life {
    /// Represents a Pixel coordinate
@@ -65,11 +66,6 @@ namespace life {
        }
    };
 
-   /*
-   std::map< std::string, Color > color_pallet;
-   color_pallet.insert( std::make_pair( "BLACK", Color{0,0,0} ) );
-   */
-
    // A basic color pallete.
    static const Color BLACK         = Color{0,0,0}      ; //!< Black.
    static const Color WHITE         = Color{255,255,255}; //!< White.
@@ -77,6 +73,7 @@ namespace life {
    static const Color GREEN         = Color{0,250,0}    ; //!< Green.
    static const Color RED           = Color{255,0,0}    ; //!< Red.
    static const Color CRIMSON       = Color{220,20,60}  ; //!< Crimson (kind of red).
+   static const Color BLUE          = Color{0,0,255}    ; //!< Blue.
    static const Color LIGHT_BLUE    = Color{135,206,250}; //!< Light blue.
    static const Color LIGHT_GREY    = Color{210,210,210}; //!< Light blue.
    static const Color DEEP_SKY_BLUE = Color{0,191,255}  ; //!< Deep blue.
@@ -84,6 +81,8 @@ namespace life {
    static const Color STEEL_BLUE    = Color{70,130,180} ; //!< Yet another bluish color.
    static const Color YELLOW        = Color{255,255,0}  ; //!< Yellow.
    static const Color LIGHT_YELLOW  = Color{255,255,153}; //!< Light yellow.
+
+
 } // namespace
 
 #endif // COMMON_H

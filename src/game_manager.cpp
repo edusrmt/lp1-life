@@ -1,17 +1,81 @@
 #include "../include/game_manager.hpp"
-//#include "../include/visor.hpp"
-#include "../include/life.hpp"
-#include "../include/canvas.hpp"
-#include "../include/lodepng.h"
 
 using namespace life;
 using namespace std;
 
-void GameManager::initialize_game(int argc, char *argv[])
+Color GameManager::stringToColor (char *string) {
+       if(!strcmp(string, "WHITE")) {
+           return WHITE;
+       } else if (!strcmp(string, "DARK_GREEN")) {
+           return DARK_GREEN;
+       } else if (!strcmp(string, "GREEN")) {
+           return GREEN;
+       } else if (!strcmp(string, "RED")) {
+           return RED;
+       } else if (!strcmp(string, "CRIMSON")) {
+           return CRIMSON;
+       } else if (!strcmp(string, "BLUE")) {
+           return BLUE;
+       } else if (!strcmp(string, "LIGHT_BLUE")) {
+           return LIGHT_BLUE;
+       } else if (!strcmp(string, "LIGHT_GREY")) {
+           return LIGHT_GREY;
+       } else if (!strcmp(string, "DEEP_SKY_BLUE")) {
+           return DEEP_SKY_BLUE;
+       } else if (!strcmp(string, "DODGER_BLUE")) {
+           return DODGER_BLUE;
+       } else if (!strcmp(string, "STEEL_BLUE")) {
+           return STEEL_BLUE;
+       } else if (!strcmp(string, "YELLOW")) {
+           return YELLOW;
+       } else if (!strcmp(string, "LIGHT_YELLOW")) {
+           return LIGHT_YELLOW;
+       } else if (!strcmp(string, "BLACK")) {
+           return BLACK;
+       } else {
+           return BLACK;
+       }
+    }
+
+bool GameManager::initialize_game(int argc, char *argv[])
 {
-    cout << ">>> Trying to open input file [" << argv[1] << "]... ";
+    if (argc == 1) {
+        cout << "No arguments received! Use -h or --help for instructions." << endl;
+        cout << "Socorro!" << endl;
+        return 0;
+    } else if (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
+        cout << "Socorro!" << endl;
+        return 0;
+    } else {
+        for (int i = 1; i < argc; i++) {
+            if (!strcmp(argv[i], "--imgdir")) {
+                settings.imgdir = argv[++i];
+            } else if (!strcmp(argv[i], "--maxgen")) {
+                settings.maxgen = atoi(argv[++i]);
+            } else if (!strcmp(argv[i], "--fps")) {
+                settings.fps = atoi(argv[++i]);
+            } else if (!strcmp(argv[i], "--blocksize")) {
+                settings.blocksize = atoi(argv[++i]);
+            } else if (!strcmp(argv[i], "--bkgcolor")) {
+                settings.bkgcolor = stringToColor(argv[++i]);
+            } else if (!strcmp(argv[i], "--alivecolor")) {
+                settings.alivecolor = stringToColor(argv[++i]);
+            } else if (!strcmp(argv[i], "--outfile")) {
+                settings.outfile = argv[++i] ;
+            } else {
+                settings.input_cfg_file = argv[i];
+            }
+        }
+    }
+
+    if(settings.input_cfg_file == nullptr) {
+        cout << "No input file entered!" << endl;
+        return false;
+    }
+
+    cout << ">>> Trying to open input file [" << settings.input_cfg_file << "]... ";
     std::ifstream input;
-    input.open(argv[1]);
+    input.open(settings.input_cfg_file);
     cout << "done!" << endl;
     
     cout << ">>> Processing data, please wait..." << endl;
@@ -34,15 +98,7 @@ void GameManager::initialize_game(int argc, char *argv[])
         }
 
         row++;
-    }    
-
-    /*if (argc <= 2 && !strcmp(argv[1], "-h"))
-    {
-        visor::display_help();
-    } else if (argc <= 2) {
-        input.open(argv[1]);
-    }*/
-
+    }
     
     cout << ">>> Finished reading input data file." << endl << endl;
     cout << "****************************************************************" << endl;
@@ -55,6 +111,8 @@ void GameManager::initialize_game(int argc, char *argv[])
 
     log.push_back(state);
     input.close();
+
+    return 1;
 }
 
 bool GameManager::stable () {
@@ -115,7 +173,7 @@ void GameManager::evolve () {
 
 void GameManager::render () {
     cout << "Generation " << gen << ":" << endl;
-
+    /*
     for (int i = 0; i < rows; i++) {
         cout << "[";
         for (int j = 0; j < cols; j++) {
@@ -129,7 +187,7 @@ void GameManager::render () {
 
         cout << "]" << endl;
     }
-
+    */
     Canvas image(cols, rows, 10);
     
     for (int i = 0; i < rows; i++) {
