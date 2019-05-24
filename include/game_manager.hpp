@@ -16,16 +16,16 @@ namespace life {
     {
         private:
         std::vector<life::Life> log;
-        int rows, cols, gen = 1;
+        int rows, cols, gen = 0;
 
         struct game_settings {
             char *imgdir = nullptr;
             int maxgen = -1;
             int fps = 0;
             int blocksize = 1;
-            Color bkgcolor = BLACK;
-            Color alivecolor = WHITE;
-            std::string outfile;
+            Color bkgcolor = WHITE;
+            Color alivecolor = BLACK;
+            char *outfile;
             char *input_cfg_file = nullptr;
         } settings;
 

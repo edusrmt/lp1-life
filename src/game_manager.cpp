@@ -4,38 +4,38 @@ using namespace life;
 using namespace std;
 
 Color GameManager::stringToColor (char *string) {
-       if(!strcmp(string, "WHITE")) {
-           return WHITE;
-       } else if (!strcmp(string, "DARK_GREEN")) {
-           return DARK_GREEN;
-       } else if (!strcmp(string, "GREEN")) {
-           return GREEN;
-       } else if (!strcmp(string, "RED")) {
-           return RED;
-       } else if (!strcmp(string, "CRIMSON")) {
-           return CRIMSON;
-       } else if (!strcmp(string, "BLUE")) {
-           return BLUE;
-       } else if (!strcmp(string, "LIGHT_BLUE")) {
-           return LIGHT_BLUE;
-       } else if (!strcmp(string, "LIGHT_GREY")) {
-           return LIGHT_GREY;
-       } else if (!strcmp(string, "DEEP_SKY_BLUE")) {
-           return DEEP_SKY_BLUE;
-       } else if (!strcmp(string, "DODGER_BLUE")) {
-           return DODGER_BLUE;
-       } else if (!strcmp(string, "STEEL_BLUE")) {
-           return STEEL_BLUE;
-       } else if (!strcmp(string, "YELLOW")) {
-           return YELLOW;
-       } else if (!strcmp(string, "LIGHT_YELLOW")) {
-           return LIGHT_YELLOW;
-       } else if (!strcmp(string, "BLACK")) {
-           return BLACK;
-       } else {
-           return BLACK;
-       }
+    if(!strcmp(string, "WHITE")) {
+        return WHITE;
+    } else if (!strcmp(string, "DARK_GREEN")) {
+        return DARK_GREEN;
+    } else if (!strcmp(string, "GREEN")) {
+        return GREEN;
+    } else if (!strcmp(string, "RED")) {
+        return RED;
+    } else if (!strcmp(string, "CRIMSON")) {
+        return CRIMSON;
+    } else if (!strcmp(string, "BLUE")) {
+        return BLUE;
+    } else if (!strcmp(string, "LIGHT_BLUE")) {
+        return LIGHT_BLUE;
+    } else if (!strcmp(string, "LIGHT_GREY")) {
+        return LIGHT_GREY;
+    } else if (!strcmp(string, "DEEP_SKY_BLUE")) {
+        return DEEP_SKY_BLUE;
+    } else if (!strcmp(string, "DODGER_BLUE")) {
+        return DODGER_BLUE;
+    } else if (!strcmp(string, "STEEL_BLUE")) {
+        return STEEL_BLUE;
+    } else if (!strcmp(string, "YELLOW")) {
+        return YELLOW;
+    } else if (!strcmp(string, "LIGHT_YELLOW")) {
+        return LIGHT_YELLOW;
+    } else if (!strcmp(string, "BLACK")) {
+        return BLACK;
+    } else {
+        return BLACK;
     }
+}
 
 bool GameManager::initialize_game(int argc, char *argv[])
 {
@@ -127,7 +127,10 @@ bool GameManager::stable () {
 }
 
 bool GameManager::game_over () {
-    return stable() || log.back().extinct();
+    if (stable() || log.back().extinct())
+        return true;
+    else
+        return gen > settings.maxgen;
 }
 
 void GameManager::encode_png(const char* filename, const unsigned char * image, unsigned width, unsigned height)
@@ -172,35 +175,43 @@ void GameManager::evolve () {
 }
 
 void GameManager::render () {
-    cout << "Generation " << gen << ":" << endl;
-    /*
-    for (int i = 0; i < rows; i++) {
-        cout << "[";
-        for (int j = 0; j < cols; j++) {
-            if (log.back().check_cell(i, j))
-                cout << '*';
-            else
-            {
-                cout << ' ';
-            }            
+    if (settings.imgdir != nullptr) {
+        Canvas image(cols, rows, 10);
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (log.back().check_cell(i, j))
+                    image.pixel(Point2{j, i}, settings.alivecolor);
+                else
+                    image.pixel(Point2{j, i}, settings.bkgcolor);
+            }
         }
 
-        cout << "]" << endl;
-    }
-    */
-    Canvas image(cols, rows, 10);
-    
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (log.back().check_cell(i, j))
-                image.pixel(Point2{j, i}, Color{0,0,255});
-            else
-                image.pixel(Point2{j, i}, Color{255,255,255});
-        }
+        string picpath= "./pics/gen-" + to_string(gen) + ".png";
+        char picname[picpath.length() + 1];
+        strcpy(picname, picpath.c_str());
+        encode_png(picname, image.pixels(), image.width(), image.height());
     }
 
-    string picpath= "./pics/gen-" + to_string(gen) + ".png";
-    char picname[picpath.length() + 1];
-    strcpy(picname, picpath.c_str());
-    encode_png(picname, image.pixels(), image.width(), image.height());
+    if (settings.outfile != nullptr) {
+        std::ofstream output;
+        output.open(settings.outfile, std::ofstream::app);
+
+        output << "Generation " << gen << ":" << endl;    
+        for (int i = 0; i < rows; i++) {
+            output << "[";
+            for (int j = 0; j < cols; j++) {
+                if (log.back().check_cell(i, j))
+                    output << '*';
+                else
+                {
+                    output << ' ';
+                }            
+            }
+
+            output << "]" << endl;
+        }
+
+        output.close();
+    }
 }
