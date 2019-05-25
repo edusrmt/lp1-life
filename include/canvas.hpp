@@ -2,15 +2,15 @@
 #define CANVAS_H
 
 #include <vector>
-using std::vector;
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
 
 #include "common.hpp"
 
-namespace life {
+using std::vector;
 
+namespace life {
     //! Provides methods for drawing on an image.
     /*!
      * This is a drawing area on which we shall draw a Life representation.
@@ -40,8 +40,9 @@ namespace life {
             //=== Special members
             /// Constructor
             /*! Creates an empty canvas of the requested size.
-             * @param w_ The canvas width in pixels.
-             * @param h_ The canvas height in pixels.
+             * @param w The canvas width in pixels.
+             * @param h The canvas height in pixels.
+             * @param bs Block size of the image in pixels.
              */
             Canvas( size_t w=0, size_t h=0, short bs=4 )
                 : m_width{w*bs}, m_height{h*bs}, m_block_size{ bs }
@@ -84,36 +85,6 @@ namespace life {
             /// Get the canvas pixels, as an array of `unsigned char`.
             const component_t* pixels( void ) const
             { return m_pixels.data(); }
-
-            /// Draw a horizontal line with `length` pixels on the canvas, starting at a `p` location.
-            /*
-             * Example:
-             *
-             * ```
-             * (p.x, p.y), length = 15.
-             *  |
-             *  v
-             *  . . . . . . . . . . . . . . .
-             *  ```
-             */
-            void hline( const Point2 &p, size_t length, const Color& );
-            /// Draw a vertical line with `length` pixels on the canvas, starting at a `p` location.
-            /*
-             * Example:
-             *
-             * ```
-             * (p.x, p.y), length = 6.
-             *  |
-             *  v
-             *  .
-             *  .
-             *  .
-             *  .
-             *  .
-             *  .
-             *  ```
-             */
-            void vline( const Point2 &p, size_t length, const Color & );
 
         private:
             size_t m_width;    //!< The image width in pixel units.

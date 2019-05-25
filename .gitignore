@@ -19,3 +19,6 @@ CTestTestfile.cmake
 # Build files
 /bin
 /pics
+
+# Doxygen files
+/docs
