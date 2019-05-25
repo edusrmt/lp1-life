@@ -2,6 +2,7 @@
 #define LIFE_H
 
 #include <vector>
+#include <iostream>
 
 namespace life {
     //! Manages the game execution.
@@ -47,7 +48,6 @@ namespace life {
 
             return true;
         }
-
 
         bool check_cell (int row, int col) {
             if ((row >= 0 && row < g_rows) && (col >= 0 && col < g_cols))

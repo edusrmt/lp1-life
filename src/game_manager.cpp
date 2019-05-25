@@ -40,11 +40,11 @@ Color GameManager::stringToColor (char *string) {
 bool GameManager::initialize_game(int argc, char *argv[])
 {
     if (argc == 1) {
-        cout << "No arguments received! Use -h or --help for instructions." << endl;
-        cout << "Socorro!" << endl;
+        cout << ">>> No arguments received!" << endl << endl;
+        print_help();
         return 0;
     } else if (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
-        cout << "Socorro!" << endl;
+        print_help();
         return 0;
     } else {
         for (int i = 1; i < argc; i++) {
@@ -69,14 +69,20 @@ bool GameManager::initialize_game(int argc, char *argv[])
     }
 
     if(settings.input_cfg_file == nullptr) {
-        cout << "No input file entered!" << endl;
+        cout << ">>> No input file given!" << endl;
         return false;
     }
 
     cout << ">>> Trying to open input file [" << settings.input_cfg_file << "]... ";
     std::ifstream input;
     input.open(settings.input_cfg_file);
-    cout << "done!" << endl;
+    
+    if (input.is_open())
+        cout << "done!" << endl;
+    else {
+        cout << "fail!" << endl;
+        return 0;
+    }    
     
     cout << ">>> Processing data, please wait..." << endl;
     char alive;
@@ -99,6 +105,10 @@ bool GameManager::initialize_game(int argc, char *argv[])
 
         row++;
     }
+
+    std::ofstream output;
+    output.open(settings.outfile, std::ofstream::trunc);
+    output.close();   
     
     cout << ">>> Finished reading input data file." << endl << endl;
     cout << "****************************************************************" << endl;
@@ -119,18 +129,27 @@ bool GameManager::stable () {
     int last = log.size() - 1;
 
     for (int i = 0; i < last; i++) {
-        if (log[i] == log[last])
+        if (log[i] == log[last]) {
+            cout << ">>> Stability found! Generation " << gen << " would be equal to generation " << i << "!" << endl;
             return true;
+        }
     }    
 
     return false;
 }
 
 bool GameManager::game_over () {
-    if (stable() || log.back().extinct())
+    if (stable() || log.back().extinct()) {
+        if(log.back().extinct())
+            cout << ">>> Population is extinct in generation " << gen << "!" << endl;
+
         return true;
-    else
-        return gen > settings.maxgen;
+    } else if (settings.maxgen != -1 && gen > settings.maxgen) {
+        cout << ">>> Reached max generation amount of " << settings.maxgen << "!" << endl;
+        return true;
+    }
+    
+    return false;
 }
 
 void GameManager::encode_png(const char* filename, const unsigned char * image, unsigned width, unsigned height)
@@ -174,9 +193,14 @@ void GameManager::evolve () {
     gen++;        
 }
 
+void GameManager::wait () {
+    if(settings.fps != -1)        
+        this_thread::sleep_for(chrono::milliseconds((int) ((1.0 / settings.fps) * 1000)));
+}
+
 void GameManager::render () {
     if (settings.imgdir != nullptr) {
-        Canvas image(cols, rows, 10);
+        Canvas image(cols, rows, settings.blocksize);
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -214,4 +238,40 @@ void GameManager::render () {
 
         output.close();
     }
+
+    if (settings.imgdir == nullptr && settings.outfile == nullptr) {
+        cout << "Generation " << gen << ":" << endl;    
+        for (int i = 0; i < rows; i++) {
+            cout << "[";
+            for (int j = 0; j < cols; j++) {
+                if (log.back().check_cell(i, j))
+                    cout << '*';
+                else
+                {
+                    cout << ' ';
+                }            
+            }
+
+            cout << "]" << endl;
+        }
+
+        wait();
+    }       
+}
+
+void GameManager::print_help () {
+    cout << "Usage: glife [<options>] <input_cfg_file>" << endl << endl;
+    cout << "  Simulation options:" << endl;
+    cout << "    --help\t\t\tPrint this help text." << endl;
+    cout << "    --imgdir <path>\t\tSpecify directory where output images are written to." << endl;
+    cout << "    --maxgen <num>\t\tMaximum number of generations to simulate." << endl;
+    cout << "    --fps <num>\t\t\tNumber of generations presented per second." << endl;
+    cout << "    --blocksize <num>\t\tPixel size of a cell. Default = 5." << endl;
+    cout << "    --bkgcolor <color>\t\tColor name for the background. Default GREEN." << endl;
+    cout << "    --alivecolor <color>\tColor name for representing alive cells. Default RED." << endl;
+    cout << "    --outfile <filename>\tWrite the text representation of the\n\t\t\t\tsimulation to the given filename." << endl << endl;
+    cout << "  Available colors are:" << endl;
+    cout << "    BLACK BLUE CRIMSON DARK_GREEN DEEP_SKY_BLUE DODGER_BLUE" << endl;
+    cout << "    GREEN LIGHT_BLUE LIGHT_GREY LIGHT_YELLOW RED STEEL_BLUE" << endl;
+    cout << "    WHITE YELLOW" << endl;
 }

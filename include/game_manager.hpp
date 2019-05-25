@@ -6,6 +6,9 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>     // atoi
+#include <chrono>
+#include <thread>
+
 #include "life.hpp"
 //#include "../include/visor.hpp"
 #include "../include/canvas.hpp"
@@ -21,10 +24,10 @@ namespace life {
         struct game_settings {
             char *imgdir = nullptr;
             int maxgen = -1;
-            int fps = 0;
-            int blocksize = 1;
-            Color bkgcolor = WHITE;
-            Color alivecolor = BLACK;
+            int fps = -1;
+            int blocksize = 5;
+            Color bkgcolor = GREEN;
+            Color alivecolor = RED;
             char *outfile;
             char *input_cfg_file = nullptr;
         } settings;
@@ -40,7 +43,9 @@ namespace life {
         bool initialize_game(int argc, char *argv[]);
         bool game_over();
         void evolve ();
+        void wait();
         void render ();
+        void print_help();
     };
 }
 
