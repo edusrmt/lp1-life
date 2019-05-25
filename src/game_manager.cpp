@@ -216,7 +216,6 @@ void GameManager::render () {
             inputdir.append("/");        
 
         string picpath= inputdir + "gen-" + to_string(gen) + ".png";
-        cout << picpath << endl;
         char picname[picpath.length() + 1];
         strcpy(picname, picpath.c_str());
         encode_png(picname, image.pixels(), image.width(), image.height());
